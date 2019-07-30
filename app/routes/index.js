@@ -1,5 +1,5 @@
-const todoRoutes = require('./todo_routes')
+const todoRoutes = require('./todo')
 
-module.exports = (app, db) => {
-  todoRoutes(app, db)
+module.exports = (app) => {
+  todoRoutes(app)
 }
