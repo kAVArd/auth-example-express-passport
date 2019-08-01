@@ -14,4 +14,5 @@ connection.once('open', function () {
 
 app.listen(port, () => console.log(`Backend work on port ${port}`))
 app.use(bodyParser.json())
+
 require('./app/routes')(app)
