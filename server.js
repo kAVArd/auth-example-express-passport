@@ -3,6 +3,7 @@ require('dotenv').config()
 const bodyParser = require('body-parser')
 const app = express()
 const mongoose = require('mongoose')
+const cors = require('cors')
 
 const port = 8000
 
@@ -14,5 +15,6 @@ connection.once('open', function () {
 
 app.listen(port, () => console.log(`Backend work on port ${port}`))
 app.use(bodyParser.json())
+app.use(cors())
 
 require('./app/routes')(app)
