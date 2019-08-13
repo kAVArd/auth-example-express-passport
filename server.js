@@ -5,7 +5,6 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const routes = require('./app/routes')
 const passportSetup = require('./config/passport-setup')
-
 const app = express()
 const port = 8000
 
