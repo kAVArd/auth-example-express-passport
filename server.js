@@ -3,7 +3,7 @@ require('dotenv').config()
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const routes = require('./app/routes')
+const authRouter = require('./app/routes/auth')
 const passportSetup = require('./config/passport-setup')
 const app = express()
 const port = 8000
@@ -16,8 +16,8 @@ connection.once('open', function () {
 })
 
 // express app configs
-app.listen(port, () => console.log(`Backend work on port ${port}`))
+app.listen(port, () => console.log(`Backend is working on port ${port}`))
 app.use(bodyParser.json())
 app.use(cors())
 
-routes(app)
+authRouter(app)

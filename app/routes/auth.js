@@ -13,4 +13,6 @@ authRouter.route('/logout').get((req, res) => {
   res.send('log out')
 })
 
-module.exports = authRouter
+module.exports = (app) => {
+  app.use(authRouter)
+}
