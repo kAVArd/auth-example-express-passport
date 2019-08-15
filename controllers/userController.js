@@ -1,9 +1,19 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User')
+const passport = require('passport')
+require('../authentication/passport/local')
 
 module.exports.postUserLogin = (req, res) => {
-  console.log(req.body)
-  res.send('ok')
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return res.send(err)
+    if (info.status === 200) return res.status(200).json({ user })
+    return res.status(info.status).json({ message: info.message })
+  })(req, res)
+}
+
+module.exports.getUserLogout = (req, res) => {
+  req.logout()
+  req.flash('flashSuccess', 'Successfully logout')
 }
 
 module.exports.postUserRegister = (req, res) => {
@@ -31,7 +41,10 @@ module.exports.postUserRegister = (req, res) => {
           console.log('New user was successfully added')
           req.flash('flashSuccess', 'Registered successfully')
           res.status(200).send(user)
-        }).catch(err => console.log(err))
+        }).catch(err => {
+          console.log(err)
+          req.flash('flashError', 'Error with saving new user')
+        })
       })
     })
   }).catch(err => console.log(err))
