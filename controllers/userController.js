@@ -5,15 +5,21 @@ require('../authentication/passport/local')
 
 module.exports.postUserLogin = (req, res) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err) return res.send(err)
-    if (info.status === 200) return res.status(200).json({ user })
+    if (err) {
+      console.log(err)
+      return res.send(err)
+    }
+    if (info.status === 200) {
+      console.log('User is logged in')
+      return res.status(200).json({ user })
+    }
     return res.status(info.status).json({ message: info.message })
   })(req, res)
 }
 
 module.exports.getUserLogout = (req, res) => {
   req.logout()
-  req.flash('flashSuccess', 'Successfully logout')
+  res.status(200).json({ message: 'Successfully log out' })
 }
 
 module.exports.postUserRegister = (req, res) => {
@@ -22,15 +28,20 @@ module.exports.postUserRegister = (req, res) => {
   // Username validation
   User.findOne({ username }).then((user) => {
     if (user) {
-      req.flash('flashError', 'Username already in use')
       return res.status(400).json({ message: 'Username already in use' })
     }
 
     // Hashing password
     bcrypt.genSalt(10, (err, salt) => {
-      if (err) res.status(500).json({ message: 'Something wrong with genSalt' })
+      if (err) {
+        console.log(err)
+        return res.status(500).json({ message: 'genSalt is failed' })
+      }
       bcrypt.hash(password, salt, (err, hash) => {
-        if (err) return res.status(500).json({ message: 'Something wrong with hashing' })
+        if (err) {
+          console.log(err)
+          return res.status(500).json({ message: 'Hashing new password is failed' })
+        }
 
         // Adding hashing user to db
         const newUser = new User({
@@ -39,27 +50,24 @@ module.exports.postUserRegister = (req, res) => {
         })
         newUser.save().then((user) => {
           console.log('New user was successfully added')
-          req.flash('flashSuccess', 'Registered successfully')
-          res.status(200).send(user)
+          res.status(200).json({ user })
         }).catch(err => {
           console.log(err)
-          req.flash('flashError', 'Error with saving new user')
+          res.status(500).json({ message: 'Saving new user is failed' })
         })
       })
     })
-  }).catch(err => console.log(err))
+  }).catch(err => {
+    console.log(err)
+    res.status(500).json({ message: 'Find user is failed' })
+  })
 }
 
 module.exports.getAllUsers = (req, res) => {
   User.find({}).then((users) => {
-    console.dir(res)
-    res.status(200).json({
-      users,
-      flashSuccess: res.locals.flashSuccess,
-      flashError: res.locals.flashError
-    })
+    res.status(200).json({ users })
   }).catch(err => {
     console.log(err)
-    res.status(500).json({ message: 'Mongo goes wrong' })
+    res.status(500).json({ message: 'getting all users is failed' })
   })
 }
