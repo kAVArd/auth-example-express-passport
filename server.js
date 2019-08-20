@@ -3,29 +3,37 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const session = require('express-session')
-const flash = require('connect-flash')
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
 require('./config/passport-setup')
 const mongoose = require('mongoose')
 const userRouter = require('./routes/users')
 
+const {
+  PORT = 8000,
+  SESS_LIFETIME = 1000 * 60 * 5,
+  NODE_ENV = 'development',
+  SESS_NAME = 'sid',
+  SESS_SECRET = 'auth-example'
+} = process.env
 const app = express()
-const port = 8000
 
 // Express app configs
 app.use(bodyParser.json())
 app.use(cors())
 
-// Flash Middlewares
 app.use(cookieParser('auth-example'))
 app.use(session({
-  cookie: { maxAge: 60000 },
-  resave: true,
-  saveUninitialized: true,
-  secret: 'auth-example'
+  name: SESS_NAME,
+  cookie: {
+    maxAge: SESS_LIFETIME,
+    secure: NODE_ENV === 'production',
+    sameSite: true
+  },
+  resave: false,
+  saveUninitialized: false,
+  secret: SESS_SECRET
 }))
-app.use(flash())
 
 // Passport initialize
 app.use(passport.initialize())
@@ -39,8 +47,8 @@ connection.once('open', function () {
 })
 
 // Routes
-app.listen(port, () => console.log(`Backend is working on port ${port}`))
+app.listen(PORT, () => console.log(`Backend is working on port ${PORT}`))
 app.use(userRouter)
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
 })

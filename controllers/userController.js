@@ -11,15 +11,21 @@ module.exports.postUserLogin = (req, res) => {
     }
     if (info.status === 200) {
       console.log('User is logged in')
-      return res.status(200).json({ user })
+      req.session.userId = user._id
+      return res.status(200).json(user)
     }
     return res.status(info.status).json({ message: info.message })
   })(req, res)
 }
 
 module.exports.getUserLogout = (req, res) => {
-  req.logout()
-  res.status(200).json({ message: 'Successfully log out' })
+  req.session.destroy(err => {
+    if (err) return res.json({ message: 'Error with destroying session' })
+
+    res.clearCookie(process.env.SESS_NAME)
+    console.log('User is logged out')
+    res.send({ isAuth: false })
+  })
 }
 
 module.exports.postUserRegister = (req, res) => {
@@ -50,7 +56,8 @@ module.exports.postUserRegister = (req, res) => {
         })
         newUser.save().then((user) => {
           console.log('New user was successfully added')
-          res.status(200).json({ user })
+          req.session.userId = user._id
+          res.status(200).json(user)
         }).catch(err => {
           console.log(err)
           res.status(500).json({ message: 'Saving new user is failed' })
@@ -64,8 +71,10 @@ module.exports.postUserRegister = (req, res) => {
 }
 
 module.exports.getAllUsers = (req, res) => {
+  console.log(req.session.userId)
+  // if (!user) return res.status(401).json({ message: 'User is unauthorized' })
   User.find({}).then((users) => {
-    res.status(200).json({ users })
+    res.status(200).json(users)
   }).catch(err => {
     console.log(err)
     res.status(500).json({ message: 'getting all users is failed' })
