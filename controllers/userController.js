@@ -9,12 +9,14 @@ module.exports.postUserLogin = (req, res) => {
       console.log(err)
       return res.send(err)
     }
-    if (info.status === 200) {
+
+    if (info.status !== 200) {
+      console.log(info)
+      res.status(info.status).json({ message: info.message })
+    } else {
       console.log('User is logged in')
-      req.session.userId = user._id
-      return res.status(200).json(user)
+      res.status(200).json(user)
     }
-    return res.status(info.status).json({ message: info.message })
   })(req, res)
 }
 
@@ -24,7 +26,6 @@ module.exports.getUserLogout = (req, res) => {
 
     res.clearCookie(process.env.SESS_NAME)
     console.log('User is logged out')
-    res.send({ isAuth: false })
   })
 }
 
@@ -56,7 +57,6 @@ module.exports.postUserRegister = (req, res) => {
         })
         newUser.save().then((user) => {
           console.log('New user was successfully added')
-          req.session.userId = user._id
           res.status(200).json(user)
         }).catch(err => {
           console.log(err)
@@ -71,8 +71,6 @@ module.exports.postUserRegister = (req, res) => {
 }
 
 module.exports.getAllUsers = (req, res) => {
-  console.log(req.session.userId)
-  // if (!user) return res.status(401).json({ message: 'User is unauthorized' })
   User.find({}).then((users) => {
     res.status(200).json(users)
   }).catch(err => {
